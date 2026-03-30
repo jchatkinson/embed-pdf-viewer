@@ -42,6 +42,7 @@ import {
   IPdfiumExecutor,
   ImageDataLike,
   AnnotationAppearanceMap,
+  PdfMeasurementScale,
 } from '@embedpdf/models';
 import type { WorkerRequest, WorkerResponse } from './pdfium-native-runner';
 import type { FontFallbackConfig } from '../pdfium/font-fallback';
@@ -86,6 +87,9 @@ type MessageType =
   | 'renderThumbnailRaw'
   | 'renderPageAnnotationRaw'
   | 'renderPageAnnotationsRaw'
+  | 'getPageMeasurementScale'
+  | 'setPageMeasurementScale'
+  | 'clearPageMeasurementScale'
   | 'getPageAnnotations'
   | 'getPageAnnotationsRaw'
   | 'createPageAnnotation'
@@ -374,6 +378,25 @@ export class RemoteExecutor implements IPdfiumExecutor {
     options?: PdfRenderPageAnnotationOptions,
   ): PdfTask<AnnotationAppearanceMap> {
     return this.send<AnnotationAppearanceMap>('renderPageAnnotationsRaw', [doc, page, options]);
+  }
+
+  getPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+  ): PdfTask<PdfMeasurementScale | undefined> {
+    return this.send<PdfMeasurementScale | undefined>('getPageMeasurementScale', [doc, page]);
+  }
+
+  setPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+    scale: PdfMeasurementScale,
+  ): PdfTask<boolean> {
+    return this.send<boolean>('setPageMeasurementScale', [doc, page, scale]);
+  }
+
+  clearPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject): PdfTask<boolean> {
+    return this.send<boolean>('clearPageMeasurementScale', [doc, page]);
   }
 
   getPageAnnotationsRaw(
