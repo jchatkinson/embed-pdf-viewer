@@ -45,6 +45,7 @@ import {
   PdfAddAttachmentParams,
   AnnotationAppearanceMap,
   ImageDataLike,
+  PdfMeasurementScale,
 } from '@embedpdf/models';
 import { ExecuteRequest, Response, SpecificExecuteRequest } from './runner';
 
@@ -557,7 +558,40 @@ export class WebWorkerEngine implements PdfEngine {
     return task;
   }
 
-  /**
+  getPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject) {
+    this.logger.debug(LOG_SOURCE, LOG_CATEGORY, 'getPageMeasurementScale', doc, page);
+    const requestId = this.generateRequestId(doc.id);
+    const task = new WorkerTask<PdfMeasurementScale | undefined>(this.worker, requestId);
+
+    const request: ExecuteRequest = createRequest(requestId, 'getPageMeasurementScale', [doc, page]);
+    this.proxy(task, request);
+
+    return task;
+  }
+
+  setPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject, scale: PdfMeasurementScale) {
+    this.logger.debug(LOG_SOURCE, LOG_CATEGORY, 'setPageMeasurementScale', doc, page, scale);
+    const requestId = this.generateRequestId(doc.id);
+    const task = new WorkerTask<boolean>(this.worker, requestId);
+
+    const request: ExecuteRequest = createRequest(requestId, 'setPageMeasurementScale', [doc, page, scale]);
+    this.proxy(task, request);
+
+    return task;
+  }
+
+  clearPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject) {
+    this.logger.debug(LOG_SOURCE, LOG_CATEGORY, 'clearPageMeasurementScale', doc, page);
+    const requestId = this.generateRequestId(doc.id);
+    const task = new WorkerTask<boolean>(this.worker, requestId);
+
+    const request: ExecuteRequest = createRequest(requestId, 'clearPageMeasurementScale', [doc, page]);
+    this.proxy(task, request);
+
+    return task;
+  }
+
+    /**
    * {@inheritDoc @embedpdf/models!PdfEngine.getPageAnnotations}
    *
    * @public

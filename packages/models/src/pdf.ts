@@ -1025,6 +1025,83 @@ export interface PdfRectDifferences {
 }
 
 /**
+ * Supported standard measurement units.
+ *
+ * @public
+ */
+export type PdfMeasurementUnit =
+  | 'pt'
+  | 'in'
+  | 'ft'
+  | 'yd'
+  | 'mm'
+  | 'cm'
+  | 'm'
+  | 'sq in'
+  | 'sq ft'
+  | 'sq yd'
+  | 'sq mm'
+  | 'sq cm'
+  | 'sq m';
+
+/**
+ * Number format entry inside a PDF measure dictionary.
+ *
+ * @public
+ */
+export interface PdfMeasurementNumberFormat {
+  unit: PdfMeasurementUnit;
+  conversionFactor: number;
+  precision: number;
+}
+
+/**
+ * Page or annotation measurement scale.
+ *
+ * @public
+ */
+export interface PdfMeasurementScale {
+  scaleLabel: string;
+  distance: PdfMeasurementNumberFormat;
+  area: PdfMeasurementNumberFormat;
+  origin?: Position;
+}
+
+/**
+ * Caption positions allowed by line-dimension annotations.
+ *
+ * @public
+ */
+export enum PdfLineMeasurementCaptionPosition {
+  Inline = 'Inline',
+  Top = 'Top',
+}
+
+/**
+ * First-class line-dimension settings.
+ *
+ * @public
+ */
+export interface PdfLineMeasurement {
+  measure: PdfMeasurementScale;
+  showCaption?: boolean;
+  captionPosition?: PdfLineMeasurementCaptionPosition;
+  captionOffset?: Position;
+  leaderLength?: number;
+  leaderExtension?: number;
+  leaderOffset?: number;
+}
+
+/**
+ * First-class polygon-dimension settings.
+ *
+ * @public
+ */
+export interface PdfPolygonMeasurement {
+  measure: PdfMeasurementScale;
+}
+
+/**
  * Basic information of pdf annotation
  *
  * @public
@@ -1777,6 +1854,11 @@ export interface PdfPolygonAnnoObject extends PdfAnnotationObjectBase {
   type: PdfAnnotationSubtype.POLYGON;
 
   /**
+   * first-class measurement metadata for polygon dimensions
+   */
+  measurement?: PdfPolygonMeasurement;
+
+  /**
    * contents of polygon annotation
    */
   contents?: string;
@@ -1888,6 +1970,11 @@ export interface PdfPolylineAnnoObject extends PdfAnnotationObjectBase {
 export interface PdfLineAnnoObject extends PdfAnnotationObjectBase {
   /** {@inheritDoc PdfAnnotationObjectBase.type} */
   type: PdfAnnotationSubtype.LINE;
+
+  /**
+   * first-class measurement metadata for line dimensions
+   */
+  measurement?: PdfLineMeasurement;
 
   /**
    * contents of line annotation
@@ -3507,6 +3594,32 @@ export interface PdfEngine<T = Blob> {
     options?: PdfRenderPageAnnotationOptions,
   ): PdfTask<AnnotationAppearanceMap<ImageDataLike>>;
   /**
+   * Read the page's persisted measurement scale from /VP and /Measure.
+   * @param doc - pdf document
+   * @param page - pdf page
+   */
+  getPageMeasurementScale: (
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+  ) => PdfTask<PdfMeasurementScale | undefined>;
+  /**
+   * Persist the page's measurement scale into a full-page viewport.
+   * @param doc - pdf document
+   * @param page - pdf page
+   * @param scale - measurement scale to persist
+   */
+  setPageMeasurementScale: (
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+    scale: PdfMeasurementScale,
+  ) => PdfTask<boolean>;
+  /**
+   * Remove the page's persisted measurement scale.
+   * @param doc - pdf document
+   * @param page - pdf page
+   */
+  clearPageMeasurementScale: (doc: PdfDocumentObject, page: PdfPageObject) => PdfTask<boolean>;
+  /**
    * Get annotations of pdf page
    * @param doc - pdf document
    * @param page - pdf page
@@ -3968,6 +4081,16 @@ export interface IPdfiumExecutor {
   ): PdfTask<AnnotationAppearanceMap<ImageDataLike>>;
 
   // Single page operations
+  getPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+  ): PdfTask<PdfMeasurementScale | undefined>;
+  setPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+    scale: PdfMeasurementScale,
+  ): PdfTask<boolean>;
+  clearPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject): PdfTask<boolean>;
   getPageAnnotationsRaw(
     doc: PdfDocumentObject,
     page: PdfPageObject,

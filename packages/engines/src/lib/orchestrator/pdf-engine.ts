@@ -50,6 +50,7 @@ import {
   ImageDataLike,
   IPdfiumExecutor,
   AnnotationAppearanceMap,
+  PdfMeasurementScale,
 } from '@embedpdf/models';
 import { WorkerTaskQueue, Priority } from './task-queue';
 import type { ImageDataConverter } from '../converters/types';
@@ -553,7 +554,44 @@ export class PdfEngine<T = Blob> implements IPdfEngine<T> {
       });
   }
 
-  // ========== Annotations ==========
+  getPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+  ): PdfTask<PdfMeasurementScale | undefined> {
+    return this.workerQueue.enqueue(
+      {
+        execute: () => this.executor.getPageMeasurementScale(doc, page),
+        meta: { docId: doc.id, pageIndex: page.index, operation: 'getPageMeasurementScale' },
+      },
+      { priority: Priority.MEDIUM },
+    );
+  }
+
+  setPageMeasurementScale(
+    doc: PdfDocumentObject,
+    page: PdfPageObject,
+    scale: PdfMeasurementScale,
+  ): PdfTask<boolean> {
+    return this.workerQueue.enqueue(
+      {
+        execute: () => this.executor.setPageMeasurementScale(doc, page, scale),
+        meta: { docId: doc.id, pageIndex: page.index, operation: 'setPageMeasurementScale' },
+      },
+      { priority: Priority.MEDIUM },
+    );
+  }
+
+  clearPageMeasurementScale(doc: PdfDocumentObject, page: PdfPageObject): PdfTask<boolean> {
+    return this.workerQueue.enqueue(
+      {
+        execute: () => this.executor.clearPageMeasurementScale(doc, page),
+        meta: { docId: doc.id, pageIndex: page.index, operation: 'clearPageMeasurementScale' },
+      },
+      { priority: Priority.MEDIUM },
+    );
+  }
+
+    // ========== Annotations ==========
 
   getPageAnnotations(doc: PdfDocumentObject, page: PdfPageObject): PdfTask<PdfAnnotationObject[]> {
     return this.workerQueue.enqueue(
