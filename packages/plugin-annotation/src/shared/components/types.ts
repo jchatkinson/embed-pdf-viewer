@@ -210,6 +210,8 @@ export interface AnnotationRendererEntry<
 
   /** Whether this annotation type uses AP rendering before editing (default: true) */
   useAppearanceStream?: boolean;
+  /** Prefer live renderer when selected even if AP exists. */
+  disableAppearanceWhenSelected?: boolean;
 
   /** Override resolved isDraggable (e.g., FreeText disables drag while editing) */
   isDraggable?: (toolDraggable: boolean, context: { isEditing: boolean }) => boolean;
@@ -257,6 +259,7 @@ export interface BoxedAnnotationRenderer {
     lockAspectRatio?: boolean;
   };
   useAppearanceStream?: boolean;
+  disableAppearanceWhenSelected?: boolean;
   isDraggable?: (toolDraggable: boolean, context: { isEditing: boolean }) => boolean;
   onDoubleClick?: (annotationId: string, setEditingId: (id: string) => void) => void;
   selectOverride?: (
@@ -297,6 +300,7 @@ export function createRenderer<T extends PdfAnnotationObject, P = never>(
       | undefined,
     interactionDefaults: entry.interactionDefaults,
     useAppearanceStream: entry.useAppearanceStream,
+    disableAppearanceWhenSelected: entry.disableAppearanceWhenSelected,
     isDraggable: entry.isDraggable,
     onDoubleClick: entry.onDoubleClick,
     selectOverride: entry.selectOverride as BoxedAnnotationRenderer['selectOverride'],

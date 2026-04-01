@@ -360,7 +360,8 @@ export function Annotations(annotationsProps: AnnotationsProps) {
                     defaults?.isRotatable ?? false,
                   )
             }
-            vertexConfig={locked ? undefined : renderer.vertexConfig}
+              vertexConfig={locked ? undefined : renderer.vertexConfig}
+              disableAppearanceWhenSelected={renderer.disableAppearanceWhenSelected}
             selectionMenu={
               locked
                 ? undefined

@@ -12,7 +12,6 @@ interface Props {
 export function PreviewRenderer({ toolId, preview, scale }: Props) {
   const { bounds } = preview;
   const registeredRenderers = useRegisteredRenderers();
-
   const allRenderers = useMemo(() => {
     const externalIds = new Set(registeredRenderers.map((r) => r.id));
     return [...registeredRenderers, ...builtInRenderers.filter((r) => !externalIds.has(r.id))];
