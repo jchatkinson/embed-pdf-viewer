@@ -24,6 +24,7 @@ import { Ink } from './annotations/ink';
 import { Square } from './annotations/square';
 import { Circle } from './annotations/circle';
 import { Line } from './annotations/line';
+import { LineDimension } from './annotations/line-dimension';
 import { Polyline } from './annotations/polyline';
 import { Polygon } from './annotations/polygon';
 import { Text } from './annotations/text';
@@ -37,6 +38,11 @@ import { Squiggly } from './text-markup/squiggly';
 import { Caret } from './annotations/caret';
 import { LinkLockedMode } from './annotations/link-locked';
 import { LinkPreviewData } from '@embedpdf/plugin-annotation';
+import {
+  getLineDimensionHandleVertices,
+  isLineDimensionAnnotation,
+  updateLineDimensionFromVertices,
+} from '../../lib/geometry/line-dimension';
 
 export const builtInRenderers: BoxedAnnotationRenderer[] = [
   // --- Drawing ---
@@ -91,8 +97,46 @@ export const builtInRenderers: BoxedAnnotationRenderer[] = [
   // --- Lines & Vertex-based ---
 
   createRenderer<PdfLineAnnoObject>({
+    id: 'linearMeasure',
+    matches: (a): a is PdfLineAnnoObject => isLineDimensionAnnotation(a),
+    render: ({ currentObject, isSelected, scale, onClick, appearanceActive }) => (
+      <Fragment>
+        <LineDimension
+          {...currentObject}
+          isSelected={isSelected}
+          scale={scale}
+          onClick={onClick}
+          appearanceActive={appearanceActive}
+        />
+      </Fragment>
+    ),
+    renderPreview: ({ data, bounds, scale }) => (
+      <LineDimension
+        {...(data as PdfLineAnnoObject)}
+        rect={bounds}
+        isSelected={false}
+        scale={scale}
+        appearanceActive={false}
+      />
+    ),
+    vertexConfig: {
+      extractVertices: (a) => getLineDimensionHandleVertices(a),
+      extractVertexMetadata: () => [
+        { handleRole: 'measure-start' },
+        { handleRole: 'measure-end' },
+        { handleRole: 'offset-start' },
+        { handleRole: 'offset-end' },
+      ],
+      transformAnnotation: (a, vertices, metadata) => updateLineDimensionFromVertices(a, vertices, metadata),
+    },
+    interactionDefaults: { isDraggable: true, isResizable: false, isRotatable: false },
+    disableAppearanceWhenSelected: true,
+  }),
+
+  createRenderer<PdfLineAnnoObject>({
     id: 'line',
-    matches: (a): a is PdfLineAnnoObject => a.type === PdfAnnotationSubtype.LINE,
+    matches: (a): a is PdfLineAnnoObject =>
+      a.type === PdfAnnotationSubtype.LINE && !isLineDimensionAnnotation(a),
     render: ({ currentObject, isSelected, scale, onClick, appearanceActive }) => (
       <Fragment>
         <Line

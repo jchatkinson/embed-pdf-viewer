@@ -61,6 +61,7 @@ interface AnnotationContainerProps<T extends PdfAnnotationObject> {
   onSelect: (event: AnnotationInteractionEvent) => void;
   /** Pre-rendered appearance stream images for AP mode rendering */
   appearance?: AnnotationAppearances<Blob> | null;
+  disableAppearanceWhenSelected?: boolean;
   /** Blend mode applied only to the visual content (children + AP image), not to interaction handles */
   blendMode?: CssBlendMode;
   zIndex?: number;
@@ -109,6 +110,7 @@ export function AnnotationContainer<T extends PdfAnnotationObject>({
   onDoubleClick,
   onSelect,
   appearance,
+  disableAppearanceWhenSelected = false,
   zIndex = 1,
   resizeUI,
   vertexUI,
@@ -241,15 +243,27 @@ export function AnnotationContainer<T extends PdfAnnotationObject>({
       // Vertex edit - handle directly (no attached link handling needed)
       if (type === 'vertex-edit' && changes.vertices && vertexConfig) {
         const base = gestureBaseRef.current ?? trackedAnnotation.object;
-        const vertexChanges = vertexConfig.transformAnnotation(base, changes.vertices);
+        const vertexChanges = vertexConfig.transformAnnotation(base, changes.vertices, metadata);
         const patched = annotationCapability?.transformAnnotation<T>(base, {
           type,
           changes: vertexChanges as Partial<T>,
           metadata,
         });
         if (patched) {
+          console.log('[AnnotationContainer][vertex-edit]', {
+            annotationId: id,
+            eventState: event.state,
+            metadata,
+            vertexChanges,
+            patched,
+          });
           setPreview((prev) => ({ ...prev, ...patched }));
           if (event.state === 'end') {
+            console.log('[AnnotationContainer][vertex-edit][commit]', {
+              annotationId: id,
+              pageIndex,
+              patched,
+            });
             annotationProvides?.updateAnnotation(pageIndex, id, patched);
           }
         }
@@ -316,11 +330,12 @@ export function AnnotationContainer<T extends PdfAnnotationObject>({
     dragProps,
     vertices,
     resize,
-    rotation: rotationHandle,
+      rotation: rotationHandle,
   } = useInteractionHandles({
     controller: {
       element: controllerElement,
       vertices: vertexConfig?.extractVertices(currentObject),
+      vertexMetadata: vertexConfig?.extractVertexMetadata?.(currentObject),
       constraints: {
         minWidth: 10,
         minHeight: 10,
@@ -447,7 +462,11 @@ export function AnnotationContainer<T extends PdfAnnotationObject>({
   }, [currentObject, explicitUnrotatedRect]);
 
   const apActive =
-    !!appearance?.normal && !gestureActive && !isEditing && !trackedAnnotation.dictMode;
+    !!appearance?.normal &&
+    !gestureActive &&
+    !isEditing &&
+    !trackedAnnotation.dictMode &&
+    !(disableAppearanceWhenSelected && isSelected);
 
   // Shared positioning for both layers
   const layerBaseStyle = {

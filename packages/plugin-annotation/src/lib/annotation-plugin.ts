@@ -593,6 +593,14 @@ export class AnnotationPlugin extends BasePlugin<
     };
 
     const tool = this.findToolForAnnotation(annotation);
+    console.log('[AnnotationPlugin][transformAnnotation]', {
+      annotationId: annotation.id,
+      annotationType: annotation.type,
+      annotationIntent: annotation.intent,
+      transformType: options.type,
+      toolId: tool?.id ?? null,
+      changes: options.changes,
+    });
     if (tool?.transform) {
       return tool.transform(annotation, context) as Partial<T>;
     }

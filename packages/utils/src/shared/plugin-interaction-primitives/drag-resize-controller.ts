@@ -15,6 +15,7 @@ export interface DragResizeConfig {
    */
   rotationElement?: Rect;
   vertices?: Position[];
+  vertexMetadata?: Array<Record<string, unknown> | undefined>;
   constraints?: {
     minWidth?: number;
     minHeight?: number;
@@ -44,6 +45,7 @@ export interface TransformData {
   metadata?: {
     handle?: ResizeHandle;
     vertexIndex?: number;
+    handleRole?: string;
     maintainAspectRatio?: boolean;
     /** The rotation angle in degrees */
     rotationAngle?: number;
@@ -76,6 +78,7 @@ export class DragResizeController {
 
   // Vertex editing state - pure geometric
   private activeVertexIndex: number | null = null;
+  private activeVertexMetadata: Record<string, unknown> | undefined;
   private startVertices: Position[] = [];
   private currentVertices: Position[] = [];
 
@@ -153,6 +156,7 @@ export class DragResizeController {
 
     this.state = 'vertex-editing';
     this.activeVertexIndex = vertexIndex;
+    this.activeVertexMetadata = this.config.vertexMetadata?.[vertexIndex];
     this.startPoint = { x: clientX, y: clientY };
     this.startVertices = [...this.currentVertices];
     this.gestureRotationCenter = this.config.rotationCenter ?? {
@@ -165,7 +169,7 @@ export class DragResizeController {
       transformData: {
         type: 'vertex-edit',
         changes: { vertices: this.startVertices },
-        metadata: { vertexIndex },
+        metadata: { vertexIndex, ...(this.activeVertexMetadata ?? {}) },
       },
     });
   }
@@ -272,7 +276,10 @@ export class DragResizeController {
         transformData: {
           type: 'vertex-edit',
           changes: { vertices },
-          metadata: { vertexIndex: this.activeVertexIndex },
+          metadata: {
+            vertexIndex: this.activeVertexIndex,
+            ...(this.activeVertexMetadata ?? {}),
+          },
         },
       });
     } else if (this.state === 'rotating' && this.rotationCenter) {
@@ -323,7 +330,10 @@ export class DragResizeController {
         transformData: {
           type: 'vertex-edit',
           changes: { vertices: this.currentVertices },
-          metadata: { vertexIndex: vertexIndex || undefined },
+          metadata: {
+            vertexIndex: vertexIndex ?? undefined,
+            ...(this.activeVertexMetadata ?? {}),
+          },
         },
       });
     } else if (wasState === 'rotating') {
@@ -371,7 +381,10 @@ export class DragResizeController {
         transformData: {
           type: 'vertex-edit',
           changes: { vertices: this.startVertices },
-          metadata: { vertexIndex: this.activeVertexIndex || undefined },
+          metadata: {
+            vertexIndex: this.activeVertexIndex ?? undefined,
+            ...(this.activeVertexMetadata ?? {}),
+          },
         },
       });
     } else if (this.state === 'rotating') {
@@ -421,6 +434,7 @@ export class DragResizeController {
     this.activeHandle = null;
     this.currentPosition = null;
     this.activeVertexIndex = null;
+    this.activeVertexMetadata = undefined;
     this.startVertices = [];
     // Reset rotation state
     this.rotationCenter = null;

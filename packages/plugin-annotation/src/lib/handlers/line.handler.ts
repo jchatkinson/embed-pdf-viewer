@@ -10,6 +10,10 @@ import { useState } from '../utils/use-state';
 import * as patching from '../patching';
 import { clamp } from '@embedpdf/core';
 import { useClickDetector } from './click-detector';
+import {
+  applyLineDimensionDerivedState,
+  isLineDimensionAnnotation,
+} from '../geometry/line-dimension';
 
 export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
   annotationType: PdfAnnotationSubtype.LINE,
@@ -25,8 +29,7 @@ export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
     const getDefaults = () => {
       const tool = getTool();
       if (!tool) return null;
-
-      return {
+      const defaults = {
         ...tool.defaults,
         strokeWidth: tool.defaults.strokeWidth ?? 1,
         lineEndings: tool.defaults.lineEndings ?? {
@@ -40,6 +43,8 @@ export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
         strokeColor: tool.defaults.strokeColor ?? '#000000',
         flags: tool.defaults.flags ?? ['print'],
       };
+
+      return defaults;
     };
 
     const clickDetector = useClickDetector<PdfLineAnnoObject>({
@@ -69,21 +74,19 @@ export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
         // If clamping significantly altered the line, we might want to maintain the angle
         // by adjusting the opposite point, but for simplicity we'll just use the clamped points
 
-        const rect = patching.lineRectWithEndings(
-          [start, end],
-          defaults.strokeWidth,
-          defaults.lineEndings,
-        );
-
-        onCommit({
+        const annotation: PdfLineAnnoObject = {
           ...defaults,
-          rect,
+          rect: patching.lineRectWithEndings([start, end], defaults.strokeWidth, defaults.lineEndings),
           linePoints: { start, end },
           pageIndex,
           id: uuidV4(),
           created: new Date(),
           type: PdfAnnotationSubtype.LINE,
-        });
+        };
+
+        onCommit(isLineDimensionAnnotation(annotation)
+          ? { ...annotation, ...applyLineDimensionDerivedState(annotation) }
+          : annotation);
       },
     });
 
@@ -97,20 +100,22 @@ export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
       const defaults = getDefaults();
       if (!defaults) return null;
 
-      const bounds = patching.lineRectWithEndings(
-        [start, current],
-        defaults.strokeWidth,
-        defaults.lineEndings,
-      );
+      const base = {
+        ...defaults,
+        rect: patching.lineRectWithEndings([start, current], defaults.strokeWidth, defaults.lineEndings),
+        linePoints: { start, end: current },
+      };
+      const bounds = isLineDimensionAnnotation(base)
+        ? applyLineDimensionDerivedState(base).rect ?? base.rect
+        : base.rect;
+      const data = isLineDimensionAnnotation(base)
+        ? { ...base, ...applyLineDimensionDerivedState(base) }
+        : base;
 
       return {
         type: PdfAnnotationSubtype.LINE,
         bounds,
-        data: {
-          ...defaults,
-          rect: bounds,
-          linePoints: { start, end: current },
-        },
+        data: { ...data, rect: bounds },
       };
     };
 
@@ -144,21 +149,23 @@ export const lineHandlerFactory: HandlerFactory<PdfLineAnnoObject> = {
 
           // Only create if line is long enough
           if (Math.abs(clampedPos.x - start.x) > 2 || Math.abs(clampedPos.y - start.y) > 2) {
-            const rect = patching.lineRectWithEndings(
-              [start, clampedPos],
-              defaults.strokeWidth,
-              defaults.lineEndings,
-            );
-            onCommit({
+            const annotation: PdfLineAnnoObject = {
               ...defaults,
-              rect,
+              rect: patching.lineRectWithEndings(
+                [start, clampedPos],
+                defaults.strokeWidth,
+                defaults.lineEndings,
+              ),
               linePoints: { start, end: clampedPos },
               pageIndex,
               id: uuidV4(),
               flags: ['print'],
               created: new Date(),
               type: PdfAnnotationSubtype.LINE,
-            });
+            };
+            onCommit(isLineDimensionAnnotation(annotation)
+              ? { ...annotation, ...applyLineDimensionDerivedState(annotation) }
+              : annotation);
           }
         }
 

@@ -15,6 +15,7 @@ import {
   PdfTextAlignment,
   PdfVerticalAlignment,
   PdfBlendMode,
+  PdfMeasurementScale,
 } from '@embedpdf/models';
 import { FormattedSelection } from '@embedpdf/plugin-selection';
 import { AnnotationTool } from '../tools/types';
@@ -64,6 +65,17 @@ export interface LinePreviewData {
   lineEndings?: LineEndings;
   strokeStyle: PdfAnnotationBorderStyle;
   strokeDashArray: number[];
+  intent?: string;
+  contents?: string;
+  measurement?: {
+    measure: PdfMeasurementScale;
+    showCaption?: boolean;
+    captionPosition?: string;
+    captionOffset?: Position;
+    leaderLength?: number;
+    leaderExtension?: number;
+    leaderOffset?: number;
+  };
 }
 
 export interface InkPreviewData {

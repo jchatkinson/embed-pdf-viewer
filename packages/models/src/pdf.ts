@@ -1972,6 +1972,21 @@ export interface PdfLineAnnoObject extends PdfAnnotationObjectBase {
   type: PdfAnnotationSubtype.LINE;
 
   /**
+   * font family used for line-dimension caption appearance (`/DA`)
+   */
+  fontFamily?: PdfStandardFont;
+
+  /**
+   * font size used for line-dimension caption appearance (`/DA`)
+   */
+  fontSize?: number;
+
+  /**
+   * font color used for line-dimension caption appearance (`/DA`)
+   */
+  fontColor?: string;
+
+  /**
    * first-class measurement metadata for line dimensions
    */
   measurement?: PdfLineMeasurement;

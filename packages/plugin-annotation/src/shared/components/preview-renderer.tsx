@@ -7,6 +7,7 @@ import { Polyline } from './annotations/polyline';
 import { Line } from './annotations/line';
 import { Ink } from './annotations/ink';
 import { useRegisteredRenderers } from '../context/renderer-registry';
+import { builtInRenderers } from './built-in-renderers';
 
 interface Props {
   toolId: string;
@@ -17,6 +18,7 @@ interface Props {
 export function PreviewRenderer({ toolId, preview, scale }: Props) {
   const { bounds } = preview;
   const registeredRenderers = useRegisteredRenderers();
+  const allRenderers = [...registeredRenderers, ...builtInRenderers];
 
   const style = {
     position: 'absolute' as const,
@@ -27,6 +29,15 @@ export function PreviewRenderer({ toolId, preview, scale }: Props) {
     pointerEvents: 'none' as const,
     zIndex: 10,
   };
+
+  const match = allRenderers.find((r) => r.id === toolId && r.renderPreview);
+  if (match?.renderPreview) {
+    return (
+      <div style={style}>
+        {match.renderPreview({ data: preview.data, bounds: preview.bounds, scale })}
+      </div>
+    );
+  }
 
   if (preview.type === PdfAnnotationSubtype.CIRCLE) {
     return (
@@ -92,15 +103,6 @@ export function PreviewRenderer({ toolId, preview, scale }: Props) {
             backgroundColor: 'transparent',
           }}
         />
-      </div>
-    );
-  }
-
-  const match = registeredRenderers.find((r) => r.id === toolId && r.renderPreview);
-  if (match?.renderPreview) {
-    return (
-      <div style={style}>
-        {match.renderPreview({ data: preview.data, bounds: preview.bounds, scale })}
       </div>
     );
   }
