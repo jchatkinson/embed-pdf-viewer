@@ -250,20 +250,8 @@ export function AnnotationContainer<T extends PdfAnnotationObject>({
           metadata,
         });
         if (patched) {
-          console.log('[AnnotationContainer][vertex-edit]', {
-            annotationId: id,
-            eventState: event.state,
-            metadata,
-            vertexChanges,
-            patched,
-          });
           setPreview((prev) => ({ ...prev, ...patched }));
           if (event.state === 'end') {
-            console.log('[AnnotationContainer][vertex-edit][commit]', {
-              annotationId: id,
-              pageIndex,
-              patched,
-            });
             annotationProvides?.updateAnnotation(pageIndex, id, patched);
           }
         }

@@ -74,20 +74,71 @@ const funcs  = collectFunctions(ast).sort((a, b) =>
 );
 
 /** functions we always want, even if they’re not in the AST */
-const extraFunctions = ['malloc', 'free'];
+const extraFunctions = [
+  { name: 'malloc', params: ['number'], ret: 'number', exportedOnly: true },
+  { name: 'free', params: ['number'], ret: 'null', exportedOnly: true },
+  {
+    name: 'EPDFAnnot_SetName',
+    params: ['number', 'number'],
+    ret: 'boolean',
+  },
+  {
+    name: 'EPDFAnnot_GetName',
+    params: ['number'],
+    ret: 'number',
+  },
+  {
+    name: 'EPDFAnnot_SetAppearanceFromPage',
+    params: ['number', 'number', 'number'],
+    ret: 'boolean',
+  },
+  {
+    name: 'EPDFAnnot_ExportAppearanceAsDocument',
+    params: ['number'],
+    ret: 'number',
+  },
+  {
+    name: 'EPDFAnnot_ExportMultipleAppearancesAsDocument',
+    params: ['number', 'number'],
+    ret: 'number',
+  },
+  {
+    name: 'EPDFImageObj_SetPng',
+    params: ['number', 'number', 'number', 'number', 'number'],
+    ret: 'boolean',
+  },
+  {
+    name: 'EPDFImageObj_SetJpeg',
+    params: ['number', 'number', 'number', 'number', 'number'],
+    ret: 'boolean',
+  },
+];
+
+const functionMap = new Map(funcs.map((f) => [f.name, f]));
+for (const extra of extraFunctions) {
+  if (!functionMap.has(extra.name)) {
+    functionMap.set(extra.name, {
+      name: extra.name,
+      params: extra.params,
+      ret: extra.ret,
+      exportedOnly: extra.exportedOnly ?? false,
+    });
+  }
+}
+
+const allFunctions = [...functionMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 
 // #1  exported-functions.txt  (for -sEXPORTED_FUNCTIONS=[…])
 writeFileSync(
   resolve(outDir, 'exported-functions.txt'),
-  [
-    ...funcs.map(f => '_' + f.name),
-    ...extraFunctions.map(n => '_' + n),            // <- add them here
-  ].join(','),
+  allFunctions.map(f => '_' + f.name).join(','),
   'utf8',
 );
 
 // #2  functions.ts  (typed map)
-const tsLines = funcs.map(
+const tsLines = allFunctions
+  .filter(f => !f.exportedOnly)
+  .map(
   f =>
     `  ${f.name}: [${JSON.stringify(f.params)} as const, ${
       f.ret === 'null' ? 'null' : `'${f.ret}'`
@@ -103,5 +154,5 @@ writeFileSync(
 
 //  tiny summary
 console.log(
-  `generated ${funcs.length} functions – exported-functions.txt & functions.ts`,
+  `generated ${allFunctions.length} functions – exported-functions.txt & functions.ts`,
 );

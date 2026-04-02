@@ -376,19 +376,6 @@ export function updateLineDimensionFromVertices(
     nextMeasurement.leaderLength = dimensionDistance - (nextMeasurement.leaderOffset ?? 0);
   }
 
-  console.log('[LineDimension][vertex-edit]', {
-    annotationId: annotation.id,
-    metadata,
-    inferredVertexIndex,
-    handleRole,
-    originalHandles,
-    vertices,
-    originalLinePoints: annotation.linePoints,
-    nextLinePoints,
-    originalMeasurement: annotation.measurement,
-    nextMeasurement,
-  });
-
   return {
     linePoints: nextLinePoints,
     measurement: nextMeasurement,

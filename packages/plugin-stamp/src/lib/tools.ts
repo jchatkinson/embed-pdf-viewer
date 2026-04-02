@@ -1,4 +1,4 @@
-import { PdfAnnotationSubtype } from '@embedpdf/models';
+import { PdfAnnotationName, PdfAnnotationSubtype } from '@embedpdf/models';
 import { defineAnnotationTool } from '@embedpdf/plugin-annotation';
 import { rubberStampHandlerFactory } from './handlers/rubber-stamp.handler';
 
@@ -9,7 +9,12 @@ export const rubberStampTool = defineAnnotationTool({
   name: 'Rubber Stamp',
   labelKey: 'stamp.rubberStamp',
   categories: ['annotation', 'stamp', 'insert'],
-  matchScore: () => 0,
+  matchScore: (annotation) =>
+    annotation.type === PdfAnnotationSubtype.STAMP &&
+    annotation.name !== undefined &&
+    annotation.name !== PdfAnnotationName.Image
+      ? 10
+      : 0,
   interaction: {
     exclusive: true,
     cursor: 'copy',

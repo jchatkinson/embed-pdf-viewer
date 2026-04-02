@@ -21,6 +21,9 @@ export function StampImg({ libraryId, pageIndex, width, dpr, style, ...props }: 
     const task = provides.renderStamp(libraryId, pageIndex, width, dpr ?? window.devicePixelRatio);
 
     task.wait((blob) => {
+      if (urlRef.current) {
+        URL.revokeObjectURL(urlRef.current);
+      }
       const objectUrl = URL.createObjectURL(blob);
       urlRef.current = objectUrl;
       setUrl(objectUrl);
@@ -39,12 +42,5 @@ export function StampImg({ libraryId, pageIndex, width, dpr, style, ...props }: 
     };
   }, [provides, libraryId, pageIndex, width, dpr]);
 
-  const handleImageLoad = () => {
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = null;
-    }
-  };
-
-  return url ? <img src={url} onLoad={handleImageLoad} style={style} {...props} /> : null;
+  return url ? <img src={url} style={style} {...props} /> : null;
 }

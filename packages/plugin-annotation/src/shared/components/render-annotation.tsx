@@ -40,6 +40,9 @@ export function RenderAnnotation({
         },
       });
       task.wait((blob) => {
+        if (urlRef.current) {
+          URL.revokeObjectURL(urlRef.current);
+        }
         const url = URL.createObjectURL(blob);
         setImageUrl(url);
         urlRef.current = url;
@@ -68,19 +71,11 @@ export function RenderAnnotation({
     height,
   ]);
 
-  const handleImageLoad = () => {
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = null;
-    }
-  };
-
   return (
     <Fragment>
       {imageUrl && (
         <img
           src={imageUrl}
-          onLoad={handleImageLoad}
           {...props}
           style={{
             width: '100%',

@@ -15,6 +15,9 @@ export function AppearanceImage({ appearance, style }: AppearanceImageProps) {
   const urlRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+    }
     const url = URL.createObjectURL(appearance.data);
     setImageUrl(url);
     urlRef.current = url;
@@ -27,17 +30,9 @@ export function AppearanceImage({ appearance, style }: AppearanceImageProps) {
     };
   }, [appearance.data]);
 
-  const handleImageLoad = () => {
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = null;
-    }
-  };
-
   return imageUrl ? (
     <img
       src={imageUrl}
-      onLoad={handleImageLoad}
       style={{
         position: 'absolute',
         width: '100%',

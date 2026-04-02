@@ -431,6 +431,7 @@ export const reducer: Reducer<AnnotationState, AnnotationAction> = (state, actio
               ta.commitState === 'dirty' || ta.commitState === 'new' || ta.commitState === 'moved'
                 ? 'synced'
                 : ta.commitState,
+            dictMode: false,
           };
         } else {
           // This UID was not committed - keep its current state

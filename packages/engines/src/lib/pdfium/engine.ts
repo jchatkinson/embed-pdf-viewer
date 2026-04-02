@@ -1426,8 +1426,19 @@ export class PdfiumNative implements IPdfiumExecutor {
       });
     }
 
+    const preserveStampAppearance =
+      annotation.type === PdfAnnotationSubtype.STAMP &&
+      !!context &&
+      (('appearance' in context && !!context.appearance) ||
+        ('data' in context &&
+          !!context.data &&
+          getImageMetadata(context.data)?.mimeType === 'application/pdf'));
+
     if (annotation.type === PdfAnnotationSubtype.WIDGET) {
       this.pdfiumModule.EPDFAnnot_GenerateFormFieldAP(annotationPtr);
+    } else if (preserveStampAppearance) {
+      // Rubber stamps already installed a PDF appearance stream in addStampContent().
+      // Regenerating a generic AP here can wipe that custom appearance.
     } else if (annotation.blendMode !== undefined) {
       this.pdfiumModule.EPDFAnnot_GenerateAppearanceWithBlend(annotationPtr, annotation.blendMode);
     } else {

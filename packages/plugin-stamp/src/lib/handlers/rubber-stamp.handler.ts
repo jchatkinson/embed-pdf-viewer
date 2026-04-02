@@ -74,6 +74,10 @@ export const rubberStampHandlerFactory: HandlerFactory<
       onPointerLeave: () => {
         onPreview(null);
       },
+
+      onPointerCancel: () => {
+        onPreview(null);
+      },
     };
   },
 };
