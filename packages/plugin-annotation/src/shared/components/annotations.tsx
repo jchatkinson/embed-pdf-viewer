@@ -297,7 +297,7 @@ export function Annotations(annotationsProps: AnnotationsProps) {
 
         const hasRenderLocked = locked && !!renderer.renderLocked;
 
-        const isSelected = locked ? false : allSelectedIds.includes(annotation.object.id);
+        const isSelected = allSelectedIds.includes(annotation.object.id);
         const isEditing = locked ? false : editingId === annotation.object.id;
         const defaults = renderer.interactionDefaults;
 
@@ -319,12 +319,7 @@ export function Annotations(annotationsProps: AnnotationsProps) {
             ? getAppearanceForAnnotation(annotation)
             : undefined;
 
-        const noopSelect = (e: AnnotationInteractionEvent) => {
-          e.stopPropagation();
-        };
-        const onSelect = locked
-          ? noopSelect
-          : renderer.selectOverride
+        const onSelect = renderer.selectOverride
             ? (e: AnnotationInteractionEvent) =>
                 renderer.selectOverride!(e, annotation, selectHelpers)
             : (e: AnnotationInteractionEvent) => handleClick(e, annotation);
@@ -335,7 +330,7 @@ export function Annotations(annotationsProps: AnnotationsProps) {
             trackedAnnotation={annotation}
             isSelected={isSelected}
             isEditing={isEditing}
-            isMultiSelected={locked ? false : isMultiSelected}
+            isMultiSelected={isMultiSelected}
             isDraggable={finalDraggable}
             isResizable={
               locked
@@ -410,7 +405,7 @@ export function Annotations(annotationsProps: AnnotationsProps) {
                 scale,
                 pageIndex,
                 documentId,
-                onClick: locked ? undefined : onSelect,
+                onClick: onSelect,
                 appearanceActive,
               });
             }}

@@ -1245,9 +1245,6 @@ export class AnnotationPlugin extends BasePlugin<
   private selectAnnotation(pageIndex: number, id: string, documentId?: string) {
     const docId = documentId ?? this.getActiveDocumentId();
 
-    const ta = this.getAnnotationById(id, docId);
-    if (ta && this.isAnnotationLocked(ta.object, docId)) return;
-
     // Check if the annotation is part of a group
     if (this.isInGroupMethod(id, docId)) {
       // Select all group members
@@ -2647,18 +2644,6 @@ export class AnnotationPlugin extends BasePlugin<
   public setLocked(mode: LockMode, documentId?: string): void {
     const docId = documentId ?? this.getActiveDocumentId();
     this.dispatch(setLockedAction(docId, mode));
-
-    // Deselect any annotations that are now locked
-    const updatedDocState = this.getDocumentState(docId);
-    const lockedSelected = updatedDocState.selectedUids.filter((uid) => {
-      const ta = updatedDocState.byUid[uid];
-      if (!ta) return false;
-      return this.isAnnotationLocked(ta.object, docId);
-    });
-    if (lockedSelected.length > 0) {
-      const remaining = updatedDocState.selectedUids.filter((uid) => !lockedSelected.includes(uid));
-      this.dispatch(setSelection(docId, remaining));
-    }
   }
 
   public getLocked(documentId?: string): LockMode {

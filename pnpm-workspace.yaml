@@ -4,5 +4,7 @@ packages:
   - 'examples/**'
   - 'viewers/*'
   - 'website'
-    # exclude the git submodule (and everything inside it)
+  # exclude generated deployment output
+  - '!**/.vercel/**'
+  # exclude the git submodule (and everything inside it)
   - '!packages/pdfium/pdfium-src/**'
