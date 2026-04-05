@@ -16,6 +16,7 @@ import {
   PdfVerticalAlignment,
   PdfBlendMode,
   PdfMeasurementScale,
+  PdfAnnotationLineEnding,
 } from '@embedpdf/models';
 import { FormattedSelection } from '@embedpdf/plugin-selection';
 import { AnnotationTool } from '../tools/types';
@@ -97,6 +98,12 @@ export interface FreeTextPreviewData {
   textAlign?: PdfTextAlignment;
   verticalAlign?: PdfVerticalAlignment;
   contents?: string;
+  calloutLine?: Position[];
+  textBox?: Rect;
+  strokeColor?: string;
+  strokeWidth?: number;
+  lineEnding?: PdfAnnotationLineEnding;
+  color?: string;
 }
 
 export interface LinkPreviewData {
