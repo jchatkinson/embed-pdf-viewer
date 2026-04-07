@@ -101,6 +101,13 @@ export function Annotations(annotationsProps: AnnotationsProps) {
   }, [annotationProvides]);
 
   useEffect(() => {
+    if (!editingId) return;
+    if (!allSelectedIds.includes(editingId)) {
+      setEditingId(null);
+    }
+  }, [editingId, allSelectedIds]);
+
+  useEffect(() => {
     if (!annotationProvides) return;
 
     if (prevScaleRef.current !== scale) {

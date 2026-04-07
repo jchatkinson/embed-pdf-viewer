@@ -10,6 +10,7 @@
     "clean": "turbo run clean && rimraf .turbo/cache",
     "build:fresh": "pnpm clean && turbo run build",
     "build": "turbo run build",
+    "build:react": "turbo run build:base build:react --filter=\"./packages/*\"",
     "build:react-mui": "turbo run build --filter=\"./packages/*\" --filter=\"./examples/react-mui\"",
     "build:vue-vuetify": "turbo run build --filter=\"./packages/*\" --filter=\"./examples/vue-vuetify\"",
     "build:svelte-tailwind": "pnpm build:viewers && pnpm --filter @embedpdf/example-svelte-tailwind run build:app",

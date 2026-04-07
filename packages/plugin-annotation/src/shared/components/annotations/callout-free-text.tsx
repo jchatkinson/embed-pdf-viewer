@@ -25,6 +25,7 @@ interface CalloutFreeTextProps {
   pageIndex: number;
   scale: number;
   onClick?: (e: MouseEvent<Element>) => void;
+  onEditEnd?: () => void;
   appearanceActive?: boolean;
 }
 
@@ -36,6 +37,7 @@ export function CalloutFreeText({
   pageIndex,
   scale,
   onClick,
+  onEditEnd,
   appearanceActive = false,
 }: CalloutFreeTextProps) {
   const editorRef = useRef<HTMLSpanElement>(null);
@@ -129,11 +131,12 @@ export function CalloutFreeText({
   const handleBlur = () => {
     if (!editingRef.current) return;
     editingRef.current = false;
-    if (!annotationProvides) return;
-    if (!editorRef.current) return;
-    annotationProvides.updateAnnotation(pageIndex, obj.id, {
-      contents: editorRef.current.innerText.replace(/\u00A0/g, ' '),
-    });
+    if (annotationProvides && editorRef.current) {
+      annotationProvides.updateAnnotation(pageIndex, obj.id, {
+        contents: editorRef.current.innerText.replace(/\u00A0/g, ' '),
+      });
+    }
+    onEditEnd?.();
   };
 
   const width = rect.size.width * scale;

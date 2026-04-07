@@ -6,6 +6,14 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "build:base": {
+      "dependsOn": ["^build:base"],
+      "outputs": ["dist/**"]
+    },
+    "build:react": {
+      "dependsOn": ["^build:react"],
+      "outputs": ["dist/**"]
+    },
     "check-types": {
       "dependsOn": ["^check-types"]
     },

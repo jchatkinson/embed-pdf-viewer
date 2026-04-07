@@ -352,6 +352,7 @@ export const builtInRenderers: BoxedAnnotationRenderer[] = [
         pageIndex={pageIndex}
         scale={scale}
         onClick={onClick}
+        onEditEnd={() => setEditingId(null)}
         appearanceActive={appearanceActive}
       />
     ),
@@ -401,6 +402,7 @@ export const builtInRenderers: BoxedAnnotationRenderer[] = [
         pageIndex={pageIndex}
         scale={scale}
         onClick={onClick}
+        onEditEnd={() => setEditingId(null)}
         appearanceActive={appearanceActive}
       />
     ),

@@ -17,6 +17,7 @@ interface FreeTextProps {
   scale: number;
   onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   onDoubleClick?: (event: MouseEvent<HTMLDivElement>) => void;
+  onEditEnd?: () => void;
   /** When true, AP canvas provides the visual; hide text content */
   appearanceActive?: boolean;
 }
@@ -29,6 +30,7 @@ export function FreeText({
   pageIndex,
   scale,
   onClick,
+  onEditEnd,
   appearanceActive = false,
 }: FreeTextProps) {
   const editorRef = useRef<HTMLSpanElement>(null);
@@ -66,11 +68,12 @@ export function FreeText({
   const handleBlur = () => {
     if (!editingRef.current) return;
     editingRef.current = false;
-    if (!annotationProvides) return;
-    if (!editorRef.current) return;
-    annotationProvides.updateAnnotation(pageIndex, annotation.object.id, {
-      contents: editorRef.current.innerText.replace(/\u00A0/g, ' '),
-    });
+    if (annotationProvides && editorRef.current) {
+      annotationProvides.updateAnnotation(pageIndex, annotation.object.id, {
+        contents: editorRef.current.innerText.replace(/\u00A0/g, ' '),
+      });
+    }
+    onEditEnd?.();
   };
 
   return (
@@ -104,6 +107,11 @@ export function FreeText({
                 : 'flex-end',
           display: 'flex',
           backgroundColor: annotation.object.color ?? annotation.object.backgroundColor,
+          border:
+            (annotation.object.strokeWidth ?? 0) > 0
+              ? `${annotation.object.strokeWidth}px solid ${annotation.object.strokeColor ?? annotation.object.fontColor ?? '#000000'}`
+              : 'none',
+          boxSizing: 'border-box',
           opacity: annotation.object.opacity,
           width: '100%',
           height: '100%',
